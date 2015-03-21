@@ -33,6 +33,8 @@ class KYC < Sinatra::Base
   # for a given account ID
   #
   get '/repower/:amount/:card_number' do
+    amount = params[:amount]
+    card_number = params[:card_number]
     @@repower_count = @@repower_count + 1
     # CardNumber=5184680430000006
     xml_string = "<RepowerRequest>
@@ -69,12 +71,14 @@ class KYC < Sinatra::Base
     p response.body
     puts ' '
     p @@repower_count
-    status 200
-    "Added amount:#{params[:amount]} to card number: #{params[:card_number]}"
+    { status: 200, value: amount, card_number: card_number}.to_json
   end
 
   get '/moneysend/transfer/:funding_card/:receiver_card/:value' do
     @@moneysend_count = @@moneysend_count +1 
+    funding_card = params[:funding_card]
+    receiver_card = params[:receiver_card]
+    amount = params[:value]
     # FundingCard.AccountNumber=5184680430000014
     # ReceiverCard.AccountNumber=5184680430000006
     xml_string = "<TransferRequest>
@@ -142,8 +146,8 @@ class KYC < Sinatra::Base
     request.content_type = 'application/xml'
     response = Net::HTTP.new(uri.host, uri.port).start { |http| http.request request }
     response.body
-    # status 200
-    # "Transfered amount:#{params[:value]} from card: #{params[:funding_card]} to card: #{params[:receiver_card]}"
+    status 200
+    { status: 200, funding_card: funding_card, receiver_card: receiver_card, value: amount}.to_json
   end
 
 
