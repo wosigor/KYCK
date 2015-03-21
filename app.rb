@@ -5,6 +5,9 @@ require 'crack'
 
 class KYC < Sinatra::Base
 
+@@repower_count = 2310000001010101032
+@@moneysend_count = 2310000001010101111
+
 
   ############    
   # LOCATIONS
@@ -30,29 +33,30 @@ class KYC < Sinatra::Base
   # for a given account ID
   #
   get '/repower/:amount/:card_number' do
+    @@repower_count = @@repower_count + 1
     # CardNumber=5184680430000006
     xml_string = "<RepowerRequest>
-   <TransactionReference>2310000001010101014</TransactionReference>
-    <CardNumber>#{params[:card_number]}</CardNumber>
-    <TransactionAmount>
-        <Value>#{params[:amount]}</Value>
-        <Currency>840</Currency>
-    </TransactionAmount>
-    <LocalDate>1230</LocalDate>
-    <LocalTime>092435</LocalTime>
-    <!--Card Acceptor Information-->
-    <Channel>W</Channel>
-    <ICA>009674</ICA>
-    <ProcessorId>9000000442</ProcessorId>
-    <RoutingAndTransitNumber>990442082</RoutingAndTransitNumber>
-    <MerchantType>6532</MerchantType>
-    <CardAcceptor>
-        <Name>Prepaid Card</Name>
-        <City>St Charles</City>
-        <State>MO</State>
-        <PostalCode>63301</PostalCode>
-        <Country>USA</Country>
-    </CardAcceptor> 
+         <TransactionReference>#{@@repower_count}</TransactionReference>
+          <CardNumber>#{params[:card_number]}</CardNumber>
+          <TransactionAmount>
+              <Value>#{params[:amount]}</Value>
+              <Currency>840</Currency>
+          </TransactionAmount>
+          <LocalDate>1230</LocalDate>
+          <LocalTime>092435</LocalTime>
+          <!--Card Acceptor Information-->
+          <Channel>W</Channel>
+          <ICA>009674</ICA>
+          <ProcessorId>9000000442</ProcessorId>
+          <RoutingAndTransitNumber>990442082</RoutingAndTransitNumber>
+          <MerchantType>6532</MerchantType>
+          <CardAcceptor>
+              <Name>Prepaid Card</Name>
+              <City>St Charles</City>
+              <State>MO</State>
+              <PostalCode>63301</PostalCode>
+              <Country>USA</Country>
+          </CardAcceptor> 
 </RepowerRequest>"
     card_number = params['card_number']
     value = params['value']
@@ -62,10 +66,87 @@ class KYC < Sinatra::Base
     request.body = xml_string
     request.content_type = 'application/xml'
     response = Net::HTTP.new(uri.host, uri.port).start { |http| http.request request }
-    response.body
+    p response.body
+    puts ' '
+    p @@repower_count
     status 200
     "Added amount:#{params[:amount]} to card number: #{params[:card_number]}"
   end
+
+  get '/moneysend/transfer/:funding_card/:receiver_card/:value' do
+    @@moneysend_count = @@moneysend_count +1 
+    # FundingCard.AccountNumber=5184680430000014
+    # ReceiverCard.AccountNumber=5184680430000006
+    xml_string = "<TransferRequest>
+     <LocalDate>0612</LocalDate>
+     <LocalTime>161222</LocalTime>
+     <TransactionReference>#{@@moneysend_count}</TransactionReference>
+     <SenderName>John Doe</SenderName>
+     <SenderAddress>
+        <Line1>123 Main Street</Line1>
+
+        <City>Arlington</City>
+        <CountrySubdivision>VA</CountrySubdivision>
+        <PostalCode>22207</PostalCode>
+        <Country>USA</Country>
+     </SenderAddress>
+     <FundingCard>
+        <AccountNumber>#{params[:funding_card]}</AccountNumber>
+        <ExpiryMonth>11</ExpiryMonth>
+        <ExpiryYear>2016</ExpiryYear>
+     </FundingCard>
+
+     <FundingMasterCardAssignedId>123456</FundingMasterCardAssignedId>
+     <FundingAmount>
+        <Value>16000</Value>
+        <Currency>840</Currency>
+     </FundingAmount>
+     <ReceiverName>Jose Lopez</ReceiverName>
+     <ReceiverAddress>
+        <Line1>Pueblo Street</Line1>
+        <Line2>PO BOX 12</Line2>
+        <City>El PASO</City>
+        <CountrySubdivision>TX</CountrySubdivision>
+        <PostalCode>79906</PostalCode>
+        <Country>USA</Country>
+     </ReceiverAddress>
+     <ReceiverPhone>1800639426</ReceiverPhone>
+     <ReceivingCard>
+        <AccountNumber>#{params[:receiver_card]}</AccountNumber>
+     </ReceivingCard>
+     <ReceivingAmount>
+        <Value>#{params[:value]}</Value>
+        <Currency>484</Currency>
+     </ReceivingAmount>
+     <Channel>W</Channel>
+     <UCAFSupport>true</UCAFSupport>
+     <ICA>009674</ICA>
+     <ProcessorId>9000000442</ProcessorId>
+     <RoutingAndTransitNumber>990442082</RoutingAndTransitNumber>
+     <CardAcceptor>
+        <Name>My Local Bank</Name>
+        <City>Saint Louis</City>
+        <State>MO</State>
+        <PostalCode>63101</PostalCode>
+        <Country>USA</Country>
+     </CardAcceptor>
+    <TransactionDesc>P2P</TransactionDesc>
+    <MerchantId>123456</MerchantId>
+  </TransferRequest>
+  "
+
+
+    uri = URI.parse("http://dmartin.org:8021/moneysend/v2/transfer")
+    request = Net::HTTP::Post.new uri.path
+    request.body = xml_string
+    request.content_type = 'application/xml'
+    response = Net::HTTP.new(uri.host, uri.port).start { |http| http.request request }
+    response.body
+    # status 200
+    # "Transfered amount:#{params[:value]} from card: #{params[:funding_card]} to card: #{params[:receiver_card]}"
+  end
+
+
 
 
 
