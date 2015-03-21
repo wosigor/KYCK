@@ -59,9 +59,7 @@ class KYC < Sinatra::Base
               <PostalCode>63301</PostalCode>
               <Country>USA</Country>
           </CardAcceptor> 
-</RepowerRequest>"
-    card_number = params['card_number']
-    value = params['value']
+    </RepowerRequest>" 
 
     uri = URI.parse("http://dmartin.org:8021/repower/v1/repower")
     request = Net::HTTP::Post.new uri.path
