@@ -5,8 +5,8 @@ require 'crack'
 
 class KYC < Sinatra::Base
 
-@@repower_count = 2310000001010101032
-@@moneysend_count = 2310000001010101111
+@@repower_count = 2310000001010101034
+@@moneysend_count = 2310000001010101122
 
 
   ############    
@@ -95,7 +95,7 @@ class KYC < Sinatra::Base
         <Country>USA</Country>
      </SenderAddress>
      <FundingCard>
-        <AccountNumber>#{params[:funding_card]}</AccountNumber>
+        <AccountNumber>#{funding_card}</AccountNumber>
         <ExpiryMonth>11</ExpiryMonth>
         <ExpiryYear>2016</ExpiryYear>
      </FundingCard>
@@ -116,10 +116,10 @@ class KYC < Sinatra::Base
      </ReceiverAddress>
      <ReceiverPhone>1800639426</ReceiverPhone>
      <ReceivingCard>
-        <AccountNumber>#{params[:receiver_card]}</AccountNumber>
+        <AccountNumber>#{receiver_card}</AccountNumber>
      </ReceivingCard>
      <ReceivingAmount>
-        <Value>#{params[:value]}</Value>
+        <Value>#{amount}</Value>
         <Currency>484</Currency>
      </ReceivingAmount>
      <Channel>W</Channel>
