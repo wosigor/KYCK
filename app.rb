@@ -6,8 +6,8 @@ require 'crack'
 
 class KYC < Sinatra::Base
 
-@@repower_count = 2310000001010101034
-@@moneysend_count = 2310000001010101122
+@@repower_count = 2310000001010101040
+@@moneysend_count = 2310000001010101130
 
 
   ############    
@@ -67,12 +67,23 @@ class KYC < Sinatra::Base
     request.body = xml_string
     request.content_type = 'application/xml'
     response = Net::HTTP.new(uri.host, uri.port).start { |http| http.request request }
-    p response.body
-    puts ' '
+    myXML  = Crack::XML.parse(response.body)
+    myJSON = myXML.to_json
+    p myJSON
     p @@repower_count
     { status: 200, value: amount, card_number: card_number}.to_json
   end
 
+
+  ############    
+  # MoneySend
+  ############
+  #
+  # Forward post request for sending money:
+  # from funding card 
+  # to receiver card
+  # 
+  #
   get '/moneysend/transfer/:funding_card/:receiver_card/:value' do
     @@moneysend_count = @@moneysend_count +1 
     funding_card = params[:funding_card]
@@ -144,8 +155,9 @@ class KYC < Sinatra::Base
     request.body = xml_string
     request.content_type = 'application/xml'
     response = Net::HTTP.new(uri.host, uri.port).start { |http| http.request request }
-    response.body
-    status 200
+    myXML  = Crack::XML.parse(response.body)
+    myJSON = myXML.to_json
+    p myJSON
     { status: 200, funding_card: funding_card, receiver_card: receiver_card, value: amount}.to_json
   end
 
